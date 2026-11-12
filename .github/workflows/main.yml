@@ -47,11 +47,8 @@ jobs:
             echo "Android project not found"
             exit 1
           fi
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-            - name: Fix Java and Kotlin target
-        run: |
-          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/VERSION_1_8/VERSION_17/g; s/"1.8"/"17"/g; s/'"'"'1.8'"'"'/'"'"'17'"'"'/g' {} +
-          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec grep -n "VERSION_1_8\|1.8" {} +
+          ech
+      - name: Fix Java and Kotlin target
         run: |
           python3 - <<'PY'
           import glob
@@ -62,6 +59,8 @@ jobs:
               s = s.replace("'1.8'", "'17'")
               open(f, 'w').write(s)
           PY
+o "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+            
       - name: Build APK
         run: gradle -p "$PROJECT_DIR" --no-daemon assembleDebug
 
