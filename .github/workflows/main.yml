@@ -48,7 +48,17 @@ jobs:
             exit 1
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-
+      - name: Fix Java and Kotlin target
+        run: |
+          python3 - <<'PY'
+          import glob
+          for f in glob.glob('extracted/**/build.gradle*', recursive=True):
+              s = open(f).read()
+              s = s.replace('VERSION_1_8', 'VERSION_17')
+              s = s.replace('"1.8"', '"17"')
+              s = s.replace("'1.8'", "'17'")
+              open(f, 'w').write(s)
+          PY
       - name: Build APK
         run: gradle -p "$PROJECT_DIR" --no-daemon assembleDebug
 
