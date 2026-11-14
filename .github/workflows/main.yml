@@ -47,8 +47,8 @@ jobs:
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
 
-            - name: Fix Java and Kotlin target
-             run: |
+          - name: Fix Java and Kotlin target
+           run: |
           python3 - <<'PY'
           import glob
 
