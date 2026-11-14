@@ -1,10 +1,8 @@
 
-
 name: Build BFP VIP Customer Book APK
 
 on:
   push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -29,6 +27,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
       - name: Extract Android project
         run: |
@@ -49,26 +49,8 @@ jobs:
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
 
-      - name: Fix Java and Kotlin target
-        run: |
-          python3 - <<'PY'
-          import glob
-          import re
-
-          for f in glob.glob('extracted/**/*.gradle*', recursive=True):
-              s = open(f).read()
-              s = s.replace('VERSION_1_8', 'VERSION_17')
-              s = s.replace('jvmTarget = "1.8"', 'jvmTarget = "17"')
-              s = s.replace("jvmTarget = '1.8'", "jvmTarget = '17'")
-              s = re.sub(r'(sourceCompatibility\s*=\s*)"1.8"', r'\g<1>"17"', s)
-              s = re.sub(r'(targetCompatibility\s*=\s*)"1.8"', r'\g<1>"17"', s)
-              s = re.sub(r'(sourceCompatibility\s*=\s*)1\.8\b', r'\g<1>17', s)
-              s = re.sub(r'(targetCompatibility\s*=\s*)1\.8\b', r'\g<1>17', s)
-              open(f, 'w').write(s)
-          PY
-
       - name: Build APK
-        run: gradle -p "$PROJECT_DIR" --no-daemon assembleDebug
+        run: gradle -p "$PROJECT_DIR" --no-daemon -Pkotlin.jvm.target.validation.mode=warning assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
