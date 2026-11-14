@@ -47,14 +47,19 @@ jobs:
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
 
-      - name: Fix Java and Kotlin target
-        run: |
+            - name: Fix Java and Kotlin target
+             run: |
           python3 - <<'PY'
           import glob
-          for f in glob.glob('extracted/**/build.gradle*', recursive=True):
+
+          for f in glob.glob('extracted/**/*.gradle*', recursive=True):
               s = open(f).read()
-              s = s.replace('jvmTarget = "17"', 'jvmTarget = "1.8"')
-              s = s.replace("jvmTarget = '17'", "jvmTarget = '1.8'")
+              s = s.replace('VERSION_1_8', 'VERSION_17')
+              
+              s = s.replace('jvmTarget = "1.8"', 'jvmTarget = "17"')
+              s = s.replace("jvmTarget = '1.8'", "jvmTarget = '17'")
+              s = s.replace('sourceCompatibility = "1.8"', 'sourceCompatibility = "17"')
+              s = s.replace('targetCompatibility = "1.8"', 'targetCompatibility = "17"')
               open(f, 'w').write(s)
           PY
 
