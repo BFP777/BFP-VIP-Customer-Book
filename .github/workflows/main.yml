@@ -1,7 +1,11 @@
 
+
 name: Build BFP VIP Customer Book APK
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,8 +29,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
 
       - name: Extract Android project
         run: |
@@ -46,20 +48,17 @@ jobs:
             exit 1
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
- 
-      - name: Fix Java and Kotlin target
-       run: |
-        python3 - <<'PY'
-        import glob
 
-        for f in glob.glob('extracted/**/*.gradle*', recursive=True):
-            s = open(f).read()
-        s = s.replace('jvmTarget = "1.8"', 'jvmTarget = "17"')
-        s = s.replace("jvmTarget = '1.8'", "jvmTarget = '17'")
-        s = s.replace('sourceCompatibility = "1.8"', 'sourceCompatibility = "17"')
-        s = s.replace('targetCompatibility = "1.8"', 'targetCompatibility = "17"')
-            open(f, 'w').write(s)
-        PY
+      - name: Fix Kotlin target
+        run: |
+          python3 - <<'PY'
+          import glob
+          for f in glob.glob('extracted/**/*.gradle*', recursive=True):
+              s = open(f).read()
+              s = s.replace('jvmTarget = "17"', 'jvmTarget = "1.8"')
+              s = s.replace("jvmTarget = '17'", "jvmTarget = '1.8'")
+              open(f, 'w').write(s)
+          PY
 
       - name: Build APK
         run: gradle -p "$PROJECT_DIR" --no-daemon assembleDebug
